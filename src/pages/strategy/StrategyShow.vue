@@ -1,61 +1,58 @@
 <template>
+  <el-form ref="form" :model="form"  >
+    <div style="width: 100%;height:8%;text-align: end;background-color: 	#00C5CD">
+      <strong>用户昵称</strong>
+      <span> | 我的空间</span>
+      <span> | 退出</span>
+    </div>
+    <div style="height:92%;overflow: auto; ">
 
-	<el-form ref="form" :model="form" label-width="125px" >
-		<div style="height: 85vh;overflow: auto;">
-      <el-form-item label="封面图片">
-        <el-upload
-          class="avatar-uploader"
-          :action="uploadurl"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :on-change="changeImg"
-          name="imgfile">
-          <img v-if="imageUrl" :src="imageUrl"   class="avatar">
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="攻略标题">
-        <el-input v-model="form.title" style="width: 90%;"></el-input>
-      </el-form-item>
-      <el-form-item label="具体内容">
-        <el-button type="primary" @click="drawer = true">点击进行查看和编辑</el-button>
-      </el-form-item>
-
-      <div class="">
-        <el-form-item label="出发时间">
-          <div class="block">
-            <el-input
-              v-model="form.time"
-             >
-            </el-input>
+          <div :style="{backgroundImage:imageUrl}" class="picsize" style="text-align:left;position:relative;">
+            <img class="touxiang" :src=form.userUrl alt="加载失败">
+            <span class="title-config">{{form.title}}</span>
           </div>
-        </el-form-item>
+      <div style="width: 100%;height: 50px;text-align:left; position: relative">
+          <!--<img class="touxiang" src="http://127.0.0.1/touxiang.jpg">-->
+        <div style="position: absolute;left: 300px;top: 10px;">
+          <a style="color: dodgerblue;font-size: 10px" >{{form.username}} &nbsp;</a>
+          <span style="font-size: 10px">创建于{{form.addTime.split(" ")[0]}}  |</span>
+          <span style="font-size: 10px">浏览 {{form.looknum}}</span>
+
+        </div>
+
       </div>
-      <div  v-html="form.content" style="height: 100%;width: 40%">
-        <!--<el-input-->
-        <!--type="textarea"-->
-        <!--:rows="2"-->
-        <!--placeholder="请输入内容"-->
-        <!--v-html="form.content">-->
-        <!--</el-input>-->
+
+      <div class="" style=" width:100%;height: 150px;text-align:left; position: relative" >
+
+          <div class="" style=" width:680px;height: 100px; background-color:#F5F5F5;position: absolute;left: 300px; top: 10px;" >
+            <div style="position: absolute;left: 10px; top: 10px;width:500px;height: 100px;">
+              <i class="iconfont icon-icon-test1" style="font-size: 20px" > </i>
+              <span>出发日期 /</span>
+              <span class="fontcolor" >{{form.time}}</span>
+
+              &nbsp;&nbsp;
+              <span><i class="iconfont icon-icon-test" style="font-size: 20px"></i> 游玩天数 /</span>
+              <span class="fontcolor" > {{form.daynum}}</span>
+              <span>天</span>
+              &nbsp;&nbsp;
+              <span> <i class="iconfont icon-jinqian" style="font-size: 20px"></i>  人均 / </span>
+              <span class="fontcolor" > {{form.pay}}</span>
+              <span>元</span>
+
+            </div>
+
+          </div>
       </div>
 
-		<el-form-item >
-			<el-button type="primary" @click="submit">提交</el-button>
-		</el-form-item>
-		</div>
-		<el-drawer
-		title="内容编辑"
-		:visible.sync="drawer"
-		size="100%"
-		destroy-on-close
-		ref="drawer">
-		<editor :psMsg="form.content"  @transfer="drawerclose"></editor>
-		</el-drawer>
+        <div style="overflow:auto; text-align:center;"  >
+          <!--显示html-->
+          <div style="margin-left: 280px"
+               class="ql-editor" v-html="form.content">
+          </div>
+        </div>
+    </div>
+  </el-form>
 
-
-
-	</el-form>
 </template>
 
 <script>
@@ -65,6 +62,7 @@
 		props:['psMsg'],
 		data(){
 			return {
+			  strategyId:1,
 				imageUrl:'',
 				dynamicTags: [],
 				drawer: false,
@@ -77,127 +75,86 @@
 					addTime:'',
 					isDel:1,
 					content:'',
-					image:''
+					image:'',
+          pay:'',
+          daynum:'',
+          looknum:'',
+          username:'',
+          userUrl:'',
 				},
 				
 			}
 		},
 		methods:{
-
 		getData(){
 		  var _vm=this;
       this.service.post("/manage/strategy/selectbyid.do",{
         //  params:
-        "id":5,
+        "id":_vm.strategyId,
         //  }
       }).then(function (response) {
         console.log(response);
         if(response.data.status==0){
           _vm.form.title=response.data.data.data.sName;
           _vm.form.content=response.data.data.data.sText;
-          _vm.form.time=response.data.data.data.sTime;
-
+          _vm.form.time=response.data.data.data.sGotime;
+          _vm.form.addTime=response.data.data.data.sTime;
+          _vm.form.pay =response.data.data.data.sPay;
+          _vm.form.daynum=response.data.data.data.sDay;
+          _vm.form.looknum=response.data.data.data.sLookNum;
+          _vm.imageUrl=response.data.data.data.sCover;
+          _vm.imageUrl='url('+_vm.imageUrl+')';
+          _vm.form.username=response.data.data.data.sMasterName;
+          _vm.form.userUrl=response.data.data.data.sMasterUrl;
         }else{
           console.log("=======aaaaaa=======")
         }
       }).catch(function (error) {
         console.log(error);
       });
-
-
-
-
-
-
-			this.get("event/queryOne",(result)=>{
-				this.form.title=result.obj.title;
-				this.form.subtitle=result.obj.subtitle;
-				if(result.obj.time==null)
-				{this.form.time='';}else{this.form.time=result.obj.time;}
-				this.form.abstract=result.obj.abstract;
-				this.form.category=result.obj.category;
-				this.form.keyword=result.obj.keyword;
-				this.form.dataSource=result.obj.dataSource;
-				this.form.website=result.obj.website;
-				this.form.content=result.obj.content;
-				this.form.image=result.obj.image;
-				this.imageUrl=this.form.image;
-				console.log(this.form.image);
-				this.proudceTags();
-			},{id:this.psMsg});
-		},
-		submit(){
-
-			this.form.keyword=this.dynamicTags;
-			let myDate = new Date();
-			let time = myDate.toLocaleDateString().split('/').join('-');
-			//this.form.addTime=time;
-      let hour=myDate.getHours();
-      let min = myDate.getMinutes();
-      let sec = myDate.getSeconds();
-      this.form.addTime=time+" "+hour+":"+min+":"+sec;
-      console.log(this.form.content+"===content==")
-      console.log(this.form.time+"===time==")
-      console.log(this.form.addTime+"===addtime==")
-      console.log(this.form.title+"===title==")
-			// this.post("event/save",(result)=>{
-			// },this.form,'form');
-      this.service.post("/manage/strategy/strategyinsert.do",{
-        //  params:
-        "sName":this.form.title,
-        "stime":this.form.addTime,
-        "sGotime":this.form.time,
-        "sText":this.form.content,
-        //  }
-      }).then(function (response) {
-        console.log(response);
-        if(response.data.status==0&&response.data.wrongMsg==null){
-          alert("添加成功")
-        }else{
-          alert("添加失败")
-        }
-      }).catch(function (error) {
-        console.log(error);
-      });
-
-
-
-			this.$emit('transfer');
-			
-		},
-		proudceTags(){
-			if(this.form.keyword!=""){
-			let str= this.form.keyword;
-			let arr= str.split(",");
-			for(let i=0;i<arr.length;i++)
-			{this.dynamicTags.push(arr[i]);}}
-		},
-		drawerclose(msg){
-			this.form.content=msg;
-			this.drawer=false;
-		},
-		changeImg(file,fileList){
-			this.imageUrl=URL.createObjectURL(file.raw);
-		},
-		handleAvatarSuccess(res, file) {
-			this.form.image="http://59.110.236.147:8080/"+res.obj;
 		},
 	},
 		components:{
 			editor
 		},
 		created() {
-			this.form.id=this.psMsg;
+      this.strategyId=this.$route.params.id
 			this.getData();
-			console.log(this.form.id);
+
 		},
 		computed:{
-			uploadurl(){return this.axios.defaults.baseURL+"event/saveImg";}
 		},
 	}
 </script>
 
 <style>
+  .touxiang{
+    width: 80px;
+    height: 80px;
+    margin-left: 200px;
+    position:absolute;
+    bottom:-40px;
+  }
+  .title-config{
+    width: 600px;
+    color: azure;
+    font-weight: bold;
+    font-size:28px;
+    left: 300px;
+    position:absolute;
+    bottom:20px;
+    overflow-wrap:break-word;
+  }
+  .picsize{
+    width: 100%;
+    height: 360px;
+    background-size: cover;
+
+  }
+  *{margin:0; padding:0;}
+  .fontcolor{
+    color: darksalmon;
+  }
 	.el-tag + .el-tag {
     margin-left: 10px;
   }
@@ -223,18 +180,20 @@
   }
   .avatar-uploader .el-upload:hover {
     border-color: #409EFF;
+    width: 1346px;
+    height: 360px;
   }
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
-    width: 196px;
-    height: 120px;
-    line-height: 120px;
+    width: 1346px;
+    height: 360px;
+    line-height: 250px;
     text-align: center;
   }
   .avatar {
-    width: 196px;
-    height: 120px;
+    width: 1346px;
+    height: 360px;
     display: block;
   }
 </style>

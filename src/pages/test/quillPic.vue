@@ -25,7 +25,7 @@
           @ready="onEditorReady($event)"-->
         </quill-editor>
       </el-row>
-      <el-button type="primary" @click="submit">提交</el-button>
+      <el-button type="primary" @click="submit">保存</el-button>
     </div>
 
   </el-scrollbar>
@@ -80,7 +80,6 @@
                   'image': function (value) {
                     if (value) {
                       // 触发input框选择图片文件
-                      console.log("你那的不大受打击哈斯框架")
                      // document.querySelector('.avatar-uploader input').click()
                       document.querySelector('#Pic input').click()
                     } else {
@@ -98,7 +97,7 @@
       methods: {
         submit(){
           var text= this.$refs.myQuillEditor.quill.getText();
-          console.log("-----"+text)
+        //  console.log("-----"+text)
          // console.log(this.content)
           this.$emit('transfer',this.content);
         },

@@ -1,36 +1,82 @@
 <template>
+	<el-form ref="form" :model="form"  >
+    <div style="width: 100%;height: 25px;text-align: end;background-color: 	#00C5CD">
 
-	<el-form ref="form" :model="form" label-width="125px" >
-		<div style="height: 85vh;overflow: auto;">
-      <el-form-item label="封面图片">
+        <strong>用户昵称</strong>
+      <span> | 我的空间</span>
+      <span> | 退出</span>
+    </div>
+		<div style="height: 100%;overflow: auto;">
+      <el-form-item>
         <el-upload
-
           class="avatar-uploader"
+          name="uploadCover"
           :action="uploadurl"
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :on-change="changeImg"
-          name="imgfile">
-          <img v-if="imageUrl" :src="imageUrl"   class="avatar">
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+         >
+          <img v-if="imageUrl" :src="imageUrl"   class="avatar" >
+          <i v-else class="el-icon-plus avatar-uploader-icon" style="font-size: small">请添加封面图片</i>
         </el-upload>
       </el-form-item>
-      <el-form-item label="攻略标题">
-        <el-input v-model="form.title" style="width: 90%;"></el-input>
+      <el-form-item >
+        <el-input v-model="form.title"  placeholder="为攻略起个好听的名字" style="width: 60%;"></el-input>
       </el-form-item>
-      <el-form-item label="具体内容">
-        <el-button type="primary" @click="drawer = true">点击进行查看和编辑</el-button>
-      </el-form-item>
+      <el-form-item >
+          <div style="overflow:auto; text-align:center"  >
+            <!-- 图片上传组件辅助-->
+            <el-upload
+              id="Pic"
+              class="avatar-uploader"
+              :action="serverUrl"
+              name="uploadfile"
+              :headers="header"
+              :show-file-list="false"
+              :on-success="uploadSuccess"
+              :on-error="uploadError"
+              :before-upload="beforeUpload">
+            </el-upload>
+            <!--富文本编辑器组件-->
+            <el-row v-loading="quillUpdateImg">
+              <quill-editor
+                v-model="content"
+                ref="myQuillEditor"
+                :options="editorOption"
+                style="width:80%; margin-left: 10%;margin-right: 10%"
+              >
+              </quill-editor>
+            </el-row>
+            <!--<el-button type="primary" @click="submit">保存</el-button>-->
+          </div>
 
-      <div class="">
-        <el-form-item label="出发时间">
-          <div class="block">
+
+      </el-form-item>
+      <el-divider><i class="el-icon-arrow-right">&nbsp; 添加基本信息</i> &nbsp;<i class="el-icon-arrow-left"></i></el-divider>
+      <div class="" >
+        <el-form-item >
+          <div class="" >
+            <i class="iconfont icon-icon-test1" style="font-size: 20px" > </i>
+            <span>时间</span>
             <el-date-picker
+              style="width: 150px;"
+              class="data-size"
               v-model="form.time"
+              align="right"
               type="date"
-              placeholder="选择日期"
+              placeholder="选择出发日期"
               value-format="yyyy-MM-dd">
             </el-date-picker>
+
+            &nbsp;&nbsp;
+            <span>游玩天数</span>
+            <el-input v-model="form.daynum"   style="width: 50px;height: 43px"></el-input>
+            <span>天</span>
+
+            &nbsp;&nbsp;
+            <span> <i class="iconfont icon-jinqian" style="font-size: 20px"></i>  人均  </span>
+            <el-input v-model="form.pay"   style="width: 100px;height: 43px"></el-input>
+            <span>元</span>
           </div>
         </el-form-item>
       </div>
@@ -38,24 +84,48 @@
 			<el-button type="primary" @click="submit">提交</el-button>
 		</el-form-item>
 		</div>
-		<el-drawer
-		title="攻略内容编辑"
-		:visible.sync="drawer"
-		size="100%"
-		destroy-on-close
-		ref="drawer">
-		<editor :psMsg="form.content"  @transfer="drawerclose"></editor>
-		</el-drawer>
+
 	</el-form>
 </template>
 
 <script>
-	//import editor from '@/pages/edit/Editor'
 
+	//import editor from '@/pages/edit/Editor'
+  import { quillEditor,Quill } from "vue-quill-editor"; //调用编辑器
+  import {container, ImageExtend, QuillWatch} from 'quill-image-extend-module'
+
+  Quill.register('modules/ImageExtend', ImageExtend)
   import editor from '@/pages/test/quillPic'
+  import 'quill/dist/quill.core.css';
+  import 'quill/dist/quill.snow.css';
+  import 'quill/dist/quill.bubble.css';
+  const toolbarOptions = [
+    ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+    ['blockquote', 'code-block'],
+
+    [{'header': 1}, {'header': 2}],               // custom button values
+    [{'list': 'ordered'}, {'list': 'bullet'}],
+    [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+    [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+    [{'direction': 'rtl'}],                         // text direction
+
+    [{'size': ['small', false, 'large', 'huge']}],  // custom dropdown
+    [{'header': [1, 2, 3, 4, 5, 6, false]}],
+
+    [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+    [{'font': []}],
+    [{'align': []}],
+    ['link', 'image', 'video'],
+    ['clean']                                         // remove formatting button
+  ]
+
 	export default{
 		name:"StrategyEdit",
-		props:['psMsg'],
+
+    components: {
+      quillEditor,editor
+    },
+    props:['psMsg'],
 		data(){
 			return {
 				imageUrl:'',
@@ -70,30 +140,73 @@
 					addTime:'',
 					isDel:1,
 					content:'',
-					image:''
+					image:'',
+          cover:'',
+          daynum:'1',
+          pay:'',
 				},
+        quillUpdateImg: false, // 根据图片上传状态来确定是否显示loading动画，刚开始是false,不显示
+        serverUrl: 'http://localhost:8888/manage/pic/upload.do',  // 这里写你要上传的图片服务器地址
+        header: {token: sessionStorage.token},  // 有的图片服务器要求请求头需要有token之类的参数，写在这里
+        content: '', // 富文本内容
+        editorOption: {
+          placeholder: '请在此进行编辑',
+          theme: 'snow',  // or 'bubble'
+          modules: {
+            toolbar: {
+              container: toolbarOptions,  // 工具栏
+              handlers: {
+                'image': function (value) {
+                  if (value) {
+                    // 触发input框选择图片文件
+                    // document.querySelector('.avatar-uploader input').click()
+                    document.querySelector('#Pic input').click()
+                  } else {
+                    this.quill.format('image', false);
+                  }
+                }
+              },
+
+            }
+          }
+        }  // 富文本编辑器配置
 				
 			}
 		},
 		methods:{
-
+      // 上传图片前
+      beforeUpload(res, file) {
+        this.quillUpdateImg = true
+      },
+      // 上传图片成功
+      uploadSuccess(res, file) {
+        // res为图片服务器返回的数据
+        // 获取富文本组件实例
+        console.log(res)
+        let quill = this.$refs.myQuillEditor.quill
+        // 如果上传成功
+        if (res.status == '0' && res.data.url != null) {
+          // 获取光标所在位置
+          let length = quill.getSelection().index;
+          // 插入图片  res.info为服务器返回的图片地址,res.data.url
+          console.log("=====uploadSueccess======="+res.data.url)
+          quill.insertEmbed(length, 'image', 'http://127.0.0.1/'+res.data.filename)
+          // 调整光标到最后
+          quill.setSelection(length + 1)
+        } else {
+          this.$message.error('图片插入失败')
+        }
+        // loading动画消失
+        this.quillUpdateImg = false
+      },
+      // 上传图片失败
+      uploadError(res, file) {
+        // loading动画消失
+        this.quillUpdateImg = false
+        this.$message.error('图片插入失败')
+      },
 		getData(){
-			this.get("event/queryOne",(result)=>{
-				this.form.title=result.obj.title;
-				this.form.subtitle=result.obj.subtitle;
-				if(result.obj.time==null)
-				{this.form.time='';}else{this.form.time=result.obj.time;}
-				this.form.abstract=result.obj.abstract;
-				this.form.category=result.obj.category;
-				this.form.keyword=result.obj.keyword;
-				this.form.dataSource=result.obj.dataSource;
-				this.form.website=result.obj.website;
-				this.form.content=result.obj.content;
-				this.form.image=result.obj.image;
-				this.imageUrl=this.form.image;
-				console.log(this.form.image);
-				this.proudceTags();
-			},{id:this.psMsg});
+
 		},
 		submit(){
 
@@ -114,9 +227,12 @@
       this.service.post("/manage/strategy/strategyinsert.do",{
         //  params:
         "sName":this.form.title,
-        "stime":this.form.addTime,
+        "sTime":this.form.addTime,
         "sGotime":this.form.time,
-        "sText":this.form.content,
+        "sText":this.content,
+        "sPay":this.form.pay,
+        "sDay":this.form.daynum,
+        "sCover":this.form.cover,
         //  }
       }).then(function (response) {
         console.log(response);
@@ -131,53 +247,30 @@
 			this.$emit('transfer');
 			
 		},
-		proudceTags(){
-			if(this.form.keyword!=""){
-			let str= this.form.keyword;
-			let arr= str.split(",");
-			for(let i=0;i<arr.length;i++)
-			{this.dynamicTags.push(arr[i]);}}
-		},
-		drawerclose(msg){
-			this.form.content=msg;
-			this.drawer=false;
-		},
+
 		changeImg(file,fileList){
 			this.imageUrl=URL.createObjectURL(file.raw);
 		},
 		handleAvatarSuccess(res, file) {
-			this.form.image="http://59.110.236.147:8080/"+res.obj;
+			this.form.image="http://127.0.0.1/"+res.data.filename;
+			console.log("====handleAvatarSuccess====="+res.data.filename);
+      this.form.cover="http://127.0.0.1/"+res.data.filename;
 		},
 	},
-		components:{
-			editor
-		},
 		created() {
 			this.form.id=this.psMsg;
-			this.getData();
 			console.log(this.form.id);
 		},
 		computed:{
-			uploadurl(){return this.axios.defaults.baseURL+"event/saveImg";}
+			uploadurl(){return "http://localhost:8888/manage/pic/uploadCover.do";}
 		},
 	}
 </script>
 
 <style>
+  *{margin:0; padding:0;}
 	.el-tag + .el-tag {
     margin-left: 10px;
-  }
-  .button-new-tag {
-    margin-left: 10px;
-    height: 32px;
-    line-height: 30px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  .input-new-tag {
-    width: 90px;
-    margin-left: 10px;
-    vertical-align: bottom;
   }
    .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
@@ -186,25 +279,25 @@
     position: relative;
     overflow: hidden;
 
+
   }
   .avatar-uploader .el-upload:hover {
     border-color: #409EFF;
+    width: 1346px;
+    height: 360px;
   }
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
-    width: 196px;
-    height: 120px;
-    line-height: 120px;
+    width: 1346px;
+    height: 360px;
+    line-height: 250px;
     text-align: center;
   }
   .avatar {
-    width: 196px;
-    height: 120px;
+    width: 1346px;
+    height: 360px;
     display: block;
   }
-  .el-drawer{
 
-    overflow: scroll
-  }
 </style>

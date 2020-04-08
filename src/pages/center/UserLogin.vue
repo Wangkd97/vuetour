@@ -83,7 +83,7 @@
                 //当用户登录成功后，将用户信息保存到vuex中
                 // _vm.setUserInfo(response.data.data)
                 _vm.$router.push("/main")
-                // _vm.$router.push("/my")
+
               }else{
               }
             }).catch(function (error) {

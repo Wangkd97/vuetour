@@ -7,6 +7,8 @@ import StrategyEdit from '@/pages/strategy/StrategyEdit'
 import Main from '@/components/Main'
 import StrategyShow from '@/pages/strategy/StrategyShow'
 import quillPic from '@/pages/test/quillPic'
+import testPicCut from'@/pages/test/testPicCut'
+import StrategyMain from "../pages/strategy/StrategyMain";
 Vue.use(Router)
 
 export default new Router({
@@ -37,9 +39,24 @@ export default new Router({
       component:StrategyShow
     },
     {
+      path:'/show/:id',
+      name:'StrategyShow',
+      component:StrategyShow
+    },
+    {
       path:'/uploadPic',
       name:'quillPic',
       component:quillPic
+    },
+    {
+      path:'/picCut',
+      name:'testPicCut',
+      component:testPicCut
+    },
+    {
+      path:'/StrategyMain',
+      name:'StrategyMain',
+      component:StrategyMain
     },
 
   ]

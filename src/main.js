@@ -5,6 +5,13 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import './assets/icon/iconfont.css'
+
+//这是引入图片剪辑
+import VueCropper from 'vue-cropper'
+Vue.use(VueCropper)
+
+
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
@@ -32,12 +39,13 @@ var service=axios.create({
   ]
 
 })
-
+import {store} from  './store/index'
 Vue.prototype.service=service
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })
