@@ -10,6 +10,8 @@ Vue.use(Vuex)
 
 const state={
   userInfo:{},
+  username:'',
+  fuzzyname:'',
 
 }
 

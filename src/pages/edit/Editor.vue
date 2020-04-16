@@ -79,33 +79,8 @@ export default {
                 }
               }
             }
-
-
           }  // 富文本编辑器配置
 
-
-
-
-			// editorOption:{
-			// 	modules:{
-			// 		ImageExtend:{
-			// 			loading:true,
-			// 			name:'imgfile',
-			// 			size:2,
-			// 			action:"http://localhost:8080/event/saveImg",
-			// 			response:(res)=>{return "http://59.110.236.147:8080/"+res.obj},
-			// 			change:(xhr,formData)=>{}
-			// 		},
-			// 		toolbar:{
-			// 			container:container,
-			// 			handlers:{
-			// 				'image':function(){
-			// 					QuillWatch.emit(this.quill.id);
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
         }
     },
     methods: {

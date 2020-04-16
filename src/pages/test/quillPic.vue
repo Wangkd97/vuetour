@@ -97,12 +97,8 @@
       methods: {
         submit(){
           var text= this.$refs.myQuillEditor.quill.getText();
-        //  console.log("-----"+text)
-         // console.log(this.content)
           this.$emit('transfer',this.content);
         },
-
-
 
 
         // 上传图片前

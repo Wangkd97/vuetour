@@ -1,7 +1,7 @@
 <template>
   <el-form ref="form" :model="form"  >
     <div style="width: 100%;height:8%;text-align: end;background-color: 	#00C5CD">
-      <strong>用户昵称</strong>
+      <strong><el-link id="denglu" :underline="false" style="font-size: 15px" :href=dengluurl></el-link>{{denglu}}</strong>
       <span> | 我的空间</span>
       <span> | 退出</span>
     </div>
@@ -46,7 +46,7 @@
 
         <div style="overflow:auto; text-align:center;"  >
           <!--显示html-->
-          <div style="margin-left: 280px"
+          <div style="margin-left: 280px;"
                class="ql-editor" v-html="form.content">
           </div>
         </div>
@@ -56,32 +56,35 @@
 </template>
 
 <script>
+  import {mapGetters} from 'vuex'
 	import editor from '@/pages/edit/Editor'
 	export default{
 		name:"StrategyEdit",
 		props:['psMsg'],
 		data(){
 			return {
-			  strategyId:1,
-				imageUrl:'',
-				dynamicTags: [],
-				drawer: false,
-				inputVisible: false,
-				inputValue: '',
-				form:{
-					id:'',
-					title: '',
-					time: '',
-					addTime:'',
-					isDel:1,
-					content:'',
-					image:'',
-          pay:'',
-          daynum:'',
-          looknum:'',
-          username:'',
-          userUrl:'',
-				},
+        dengluurl:'',
+        denglu:'',
+          strategyId:1,
+          imageUrl:'',
+          dynamicTags: [],
+          drawer: false,
+          inputVisible: false,
+          inputValue: '',
+          form:{
+            id:'',
+            title: '',
+            time: '',
+            addTime:'',
+            isDel:1,
+            content:'',
+            image:'',
+            pay:'',
+            daynum:'',
+            looknum:'',
+            username:'',
+            userUrl:'',
+          },
 				
 			}
 		},
@@ -122,8 +125,23 @@
 			this.getData();
 
 		},
-		computed:{
-		},
+    computed:{
+      ...mapGetters(['getUser']),
+    },
+    mounted(){
+      if(JSON.stringify( this.getUser)=='{}'){
+        //未登录
+        // this.$message("weidenglu")
+
+        this.denglu="登录"
+        this.dengluurl="http://127.0.0.1:8080/#/login"
+      }else{
+        //已登录
+        //  this.$message("user=="+this.getUser)
+        this.denglu=this.getUser.uName
+        this.dengluurl="http://127.0.0.1:8080/#/main"
+      }
+    },
 	}
 </script>
 

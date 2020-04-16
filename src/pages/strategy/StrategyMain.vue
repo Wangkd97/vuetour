@@ -4,27 +4,23 @@
 
       <!--头部-->
       <div style="width: 100%;height:8%;text-align: end;background-color: #00C5CD;">
-        <strong>用户昵称</strong>
+        <strong><el-link id="denglu" :underline="false" style="font-size: 15px" :href=dengluurl></el-link>{{denglu}}</strong>
         <span> | 我的空间</span>
         <span> | 退出</span>
       </div>
       <!--菜单栏-->
       <div style="width: 100%;height: 60px;background-color: dodgerblue">
-        <el-col :span="12" style="position: absolute;top: 21px; left: 150px">
-          <el-autocomplete
-            prefix-icon="el-icon-search"
-            class="inline-input"
-            v-model="state2"
-            :fetch-suggestions="querySearch"
-            placeholder="请输入内容"
-            :trigger-on-focus="false"
-            @select="handleSelect"
-          ></el-autocomplete>
-        </el-col>
+        <el-input v-model="inputvalue"
+                  prefix-icon="el-icon-search"
+                  placeholder="请输入内容"
+                  @change="fuzzyselect"
+                  style="position: absolute;top: 21px; left: 550px;width: 250px"
+                >
+        </el-input>
         <el-radio-group v-model="tabPosition" style="position:absolute;left: 100px;top: 21px;">
           <el-radio-button label="首页">攻略首页</el-radio-button>
-          <el-radio-button label="攻略库">攻略库</el-radio-button>
-          <el-radio-button label="发布攻略">发布攻略</el-radio-button>
+          <el-radio-button label="攻略库"><p id="gonglueku" @click="togonglue">攻略库</p></el-radio-button>
+          <el-radio-button label="发布攻略" ><p id="fabu" @click="toLogin">发布攻略</p></el-radio-button>
         </el-radio-group>
       </div>
       <!--推荐-->
@@ -91,13 +87,13 @@
           </div>
           <!--显示攻略的四张图片-->
           <div name="pic" style="width: 700px;float: left;margin-left: 70px;">
-            <img alt="加载失败" :src=strategy.sCover
+            <img alt="加载失败" :src=strategy.sPics[0]
                  style="cursor:pointer;width: 160px;height: 122px" @click="toMain(strategy.sId)">
-            <img alt="加载失败" src="http://127.0.0.1/13f0f351-9722-41a2-b661-5d7cc2d88363.png"
+            <img alt="加载失败" :src=strategy.sPics[1]
                  style="cursor:pointer;width: 160px;height: 122px" @click="toMain(strategy.sId)">
-            <img alt="加载失败"  src="http://127.0.0.1/d38e85da-5558-4c00-8a4f-32e9901d2c88.png"
+            <img alt="加载失败"  :src=strategy.sPics[2]
                  style="cursor:pointer;width: 160px;height: 122px" @click="toMain(strategy.sId)">
-            <img alt="加载失败" src="http://127.0.0.1/d0d7d673-9348-4020-abcb-53f6f5c2a621.png"
+            <img alt="加载失败" :src=strategy.sPics[3]
                  style="cursor:pointer;width: 160px;height: 122px" @click="toMain(strategy.sId)">
             <el-divider></el-divider>
 
@@ -118,15 +114,20 @@
   </el-form>
 </template>
 <script>
+  import {mapGetters} from 'vuex'
+  import {mapActions} from 'vuex'
     export default {
         name: "StrategyMain",
         data(){
           return{
+            inputvalue:'',
+            dengluurl:'',
+            denglu:'',
             titlefontcolor:'color:black',
             strategylist:[],
             tabPosition: 'left',
             status:'',
-            pagetotal:'',
+            pagetotal:1,
             currentpage:1,
             start:'',
            imagebox:[{id:0,src:'http://127.0.0.1/fbb6f7de-e510-4861-b639-53331d4943a8.png'},
@@ -135,7 +136,50 @@
 
           }
         },
+      computed:{
+        ...mapGetters(['getUser']),
+        ...mapGetters(['getFuzzyName']),
+      },
+
       methods:{
+        ...mapActions(['setFuzzyName']),
+
+          fuzzyselect(currentpage){
+
+          this.getfuzzynum();
+            var start = (currentpage-1)*10;
+            var _vm=this;
+            this.service.post("/manage/strategy/fuzzyselect.do",{
+              //  params:
+              "name":this.inputvalue,
+              "start":start
+              //  }
+            }).then(function (response) {
+              console.log("获取攻略======"+response);
+              if(response.status==200){
+                _vm.strategylist=response.data.data;
+                console.log("====response.data.data="+response.data.data);
+              }else{
+                console.log("=======aaaaaa=======")
+              }
+            }).catch(function (error) {
+              console.log(error);
+            });
+          },
+
+          togonglue(){
+            this.$router.push("/StrategyStore")
+          },
+          toLogin(){
+            if(JSON.stringify( this.getUser)=='{}'){
+              //未登录
+              this.$router.push("/login");
+            }else{
+              //已登录
+              this.$router.push("/edit");
+            }
+
+          },
           toMain(strategyId){
             let routeData = this.$router.resolve({
               path:'/show/'+strategyId,
@@ -145,7 +189,12 @@
         handleCurrentChange: function(currentPage) {
           this.currentPage = currentPage;
           console.log(this.currentPage); //点击第几页
-          this.getData(currentPage);
+          if(this.getFuzzyName!=''){
+            this.fuzzyselect(currentPage);
+          }else{
+            this.getData(currentPage);
+          }
+
         },
         mouseLeave(index){
           document.getElementById(index).style.color="black";
@@ -190,11 +239,42 @@
               console.log(error);
             });
           },
+        getfuzzynum(){
+          var _vm=this;
+          this.service.post("/manage/strategy/countfuzzyselect.do",{
+            "name":this.inputvalue
+          }).then(function (response) {
+            console.log("获取数量======"+response);
+            if(response.status==200){
+              _vm.pagetotal=response.data.data;
+              console.log("====response.pagenum.data="+response.data.data);
+            }else{
+              console.log("=======aaaaaa=======")
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+        },
       },
       created(){
         this.getData(this.currentpage);
         this.getstragetynum();
+
       },
+      mounted() {
+        if(JSON.stringify( this.getUser)=='{}'){
+          //未登录
+         // this.$message("weidenglu")
+
+          this.denglu="登录"
+          this.dengluurl="http://127.0.0.1:8080/#/login"
+        }else{
+          //已登录
+        //  this.$message("user=="+this.getUser)
+          this.denglu=this.getUser.uName
+          this.dengluurl="http://127.0.0.1:8080/#/main"
+        }
+      }
     }
 </script>
 

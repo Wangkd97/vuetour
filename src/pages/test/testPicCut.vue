@@ -3,13 +3,15 @@
 
   <div class="cropper">
     <el-container>
-      <el-header  :visible="this.first">Header
+      <el-header  :visible=this.first>Header
         <!-- element 上传图片按钮 -->
         <el-upload
           class="upload-demo"
+
           action=""
           drag :auto-upload="false"
           :show-file-list="false"
+          :on-success="handleAvatarSuccess"
           :on-change='changeUpload'>
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">点击上传</div>
@@ -21,22 +23,13 @@
       <el-main>Main
         <div class="file-image"  >
           <p class="file-image">
-          <img :src="fileImg"  style="width: 100%;height: 100%;" alt="头像">
-
+          <img :src="fileImg"  style="width: 100%;height: 100%;" alt="图片">
           </p>
         </div>
 
       </el-main>
       <el-footer>Footer</el-footer>
     </el-container>
-
-
-
-    <!-- 显示裁剪后的图片 -->
-    <!--<p class="file-image">-->
-      <!--<img :src="fileImg"  style="width: 100%;height: 100%;" alt="头像">-->
-    <!--</p>-->
-
 
     <!-- vueCropper 剪裁图片实现-->
     <el-dialog title="图片剪裁" :visible.sync="dialogVisible" :close-on-press-escape="false" :close-on-click-modal="false" append-to-body>
@@ -110,7 +103,10 @@
           // 防止重复提交
           loading: false,
           first:'true',
-
+          fileName: "", //本机文件地址
+          downImg: "#",
+          imgFile: "",
+          uploadImgRelaPath: "" //上传后的图片的地址（不带服务器域名）
         }
       },
 
@@ -118,6 +114,11 @@
         VueCropper,
       },
       methods: {
+        handleAvatarSuccess(res, file) {
+       this.first=false;
+          console.log("====handleAvatarSuccess====="+res.data.filename);
+
+        },
         // 上传按钮 限制图片大小
         changeUpload (file, fileList) {
           const isLt5M = file.size / 1024 / 1024 < 5
@@ -125,29 +126,94 @@
             this.$message.error('上传文件大小不能超过 5MB!')
             return false
           }
-
           // 上传成功后将图片地址赋值给裁剪框显示图片
           this.$nextTick(() => {
             this.option.img = URL.createObjectURL(file.raw)
+            console.log("===this,option.img=="+this.option.img)
             this.dialogVisible = true
           })
         },
         // 点击裁剪，这一步是可以拿到处理后的地址
         finish () {
+          console.log("finish");
+          var _vm=this;
           // 获取截图的base64 数据
-          this.$refs.cropper.getCropData((data) => {
-            // do something
-            this.loading = true
-            this.first=false;
-            // 把图片上传到服务器
-            setTimeout(() => {
-              this.loading = false
-              this.dialogVisible = false
-              this.fileImg = data
-              document.querySelector('.file-image div').attributes(style)
-            }, 1000)
-          })
-        }
+          var formdata = new FormData();
+            this.$refs .cropper.getCropBlob(data => {
+              var srcdata=data;
+              formdata.append("uploadCover",data);
+              this.axios.put("http://localhost:8888/manage/pic/uploadCover.do",formdata
+              ).then(function (response) {
+                console.log(response);
+                if(response.data.status==0&&response.data.wrongMsg==null){
+                    _vm.loading = true
+                    _vm.first=false;
+                    // 把图片上传到服务器
+                    setTimeout(() => {
+                      _vm.loading = false
+                      _vm.dialogVisible = false
+                      _vm.fileImg = "http://127.0.0.1/"+response.data.data.filename
+                      document.querySelector('.file-image div').attribute(style)
+                    }, 1000)
+                }else{
+                  alert("添加失败")
+                }
+              }).catch(function (error) {
+                console.log(error);
+              });
+
+            });
+
+          // this.$refs.cropper.getCropData((data) => {
+          //   var blob = this.dataURLtoBlob(data);
+          //   var file = this.blobToFile(blob, );
+          //
+          //   this.service.post("/manage/pic/uploadCover.do",{
+          //     //  params:
+          //     "uploadCover":file,
+          //     //  }
+          //   }).then(function (response) {
+          //     console.log(response);
+          //     if(response.status==200){
+          //       console.log("====response.data.data="+response.data.data);
+          //     }else{
+          //       console.log("=======aaaaaa=======")
+          //     }
+          //   }).catch(function (error) {
+          //     console.log(error);
+          //   });
+          //   console.log("==data=="+data)
+          //   // do something
+          //   this.loading = true
+          //   this.first=false;
+          //   // 把图片上传到服务器
+          //   setTimeout(() => {
+          //     this.loading = false
+          //     this.dialogVisible = false
+          //     this.fileImg = data
+          //     document.querySelector('.file-image div').attribute(style)
+          //   }, 1000)
+          // })
+        },
+        dataURLtoBlob: function(dataurl) {
+          var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          return new Blob([u8arr], { type: mime });
+        },
+        //将blob转换为file
+        blobToFile: function(theBlob, filename = 'file'){
+          theBlob.lastModifiedDate = new Date();
+          theBlob.name = fileName;
+          return theBlob;
+        },
+        //调用
+
       }
     }
 </script>

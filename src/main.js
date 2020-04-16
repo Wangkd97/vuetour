@@ -40,12 +40,13 @@ var service=axios.create({
 
 })
 import {store} from  './store/index'
+import mainpage from './pages/strategy/StrategyMain'
 Vue.prototype.service=service
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
   store,
-  components: { App },
+  components: { App,mainpage },
   template: '<App/>'
 })

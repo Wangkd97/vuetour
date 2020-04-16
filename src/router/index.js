@@ -8,7 +8,8 @@ import Main from '@/components/Main'
 import StrategyShow from '@/pages/strategy/StrategyShow'
 import quillPic from '@/pages/test/quillPic'
 import testPicCut from'@/pages/test/testPicCut'
-import StrategyMain from "../pages/strategy/StrategyMain";
+import StrategyMain from "../pages/strategy/StrategyMain"
+import StrategyStore from '@/pages/strategy/StrategyStore'
 Vue.use(Router)
 
 export default new Router({
@@ -57,6 +58,11 @@ export default new Router({
       path:'/StrategyMain',
       name:'StrategyMain',
       component:StrategyMain
+    },
+    {
+      path:'/StrategyStore',
+      name:'StrategyStore',
+      component:StrategyStore
     },
 
   ]

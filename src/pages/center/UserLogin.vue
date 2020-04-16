@@ -42,6 +42,8 @@
 
 
 <script>
+  import {mapGetters} from 'vuex'
+  import {mapActions} from 'vuex'
   export default {
     name:"UserLogin",
     data() {
@@ -64,8 +66,9 @@
       };
     },
     methods: {
+      ...mapActions(['setUserInfo']),
+      ...mapActions(['setUserName']),
       submitForm(formName) {
-
         this.$refs[formName].validate(valid => {
           if (valid) {
             console.log(this.ruleForm.username+"=======loginname=====")
@@ -74,15 +77,16 @@
             //通过axios
             this.service.post("/manage/user/login.do",{
               //  params:
-              "uName":this.ruleForm.username,
+              "uEmail":this.ruleForm.username,
               "uPwd":this.ruleForm.password
               //  }
             },this.ruleForm,formName).then(function (response) {
               console.log(response);
               if(response.data.status==0&&response.data.wrongMsg==null){
                 //当用户登录成功后，将用户信息保存到vuex中
-                // _vm.setUserInfo(response.data.data)
-                _vm.$router.push("/main")
+                 _vm.setUserInfo(response.data.data)
+                _vm.setUserName(response.data.data.uName)
+                _vm.$router.push("/StrategyMain")
 
               }else{
               }
@@ -95,14 +99,9 @@
             return false
           }
         })
-
-
       }
+      },
 
-      },
-      resetForm(formName) {
-        this.$refs[formName].resetFields();
-      },
       userLogin:function () {
 
         if(this.ruleForm.username==''||this.ruleForm.password==''){
@@ -122,7 +121,12 @@
             console.log(response);
             if(response.data.status==0&&response.data.wrongMsg==null){
               //当用户登录成功后，将用户信息保存到vuex中
-             // _vm.setUserInfo(response.data.data)
+              sessionStorage.setItem("uName",response.data.data.uName)
+              sessionStorage.setItem("userInfo",response.data.data)
+              _vm.setUserInfo(response.data.data)
+
+              console.log("getuser======"+_vm.getUser)
+             _vm.$message("getuser===="+ _vm.getUser)
               _vm.$router.push("/main")
               // _vm.$router.push("/my")
             }else{
@@ -134,10 +138,20 @@
               console.log(error);
             });
         }
-
-
-
       },
+    computed:{
+      ...mapGetters(['getUser'])
+    },
+    mounted(){
+      if(JSON.stringify( this.getUser)=='{}'){
+    //未登录
+    //this.$router.push("/login");
+  }else{
+    //已登录
+    this.$router.push("/StrategyMain");
+  }
+
+  }
 
   }
 </script>

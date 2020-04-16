@@ -2,7 +2,7 @@
 	<el-form ref="form" :model="form"  >
     <div style="width: 100%;height: 25px;text-align: end;background-color: 	#00C5CD">
 
-        <strong>用户昵称</strong>
+        <strong>{{this.getUser.uName}}</strong>
       <span> | 我的空间</span>
       <span> | 退出</span>
     </div>
@@ -10,8 +10,7 @@
       <el-form-item>
         <el-upload
           class="avatar-uploader"
-          name="uploadCover"
-          :action="uploadurl"
+          action=""
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :on-change="changeImg"
@@ -49,11 +48,10 @@
             </el-row>
             <!--<el-button type="primary" @click="submit">保存</el-button>-->
           </div>
-
-
       </el-form-item>
       <el-divider><i class="el-icon-arrow-right">&nbsp; 添加基本信息</i> &nbsp;<i class="el-icon-arrow-left"></i></el-divider>
       <div class="" >
+        <!--选择出发时间-->
         <el-form-item >
           <div class="" >
             <i class="iconfont icon-icon-test1" style="font-size: 20px" > </i>
@@ -62,10 +60,11 @@
               style="width: 150px;"
               class="data-size"
               v-model="form.time"
+              @change="getrecommtags()"
               align="right"
               type="date"
               placeholder="选择出发日期"
-              value-format="yyyy-MM-dd">
+              value-format="yyyy-M-d">
             </el-date-picker>
 
             &nbsp;&nbsp;
@@ -80,12 +79,111 @@
           </div>
         </el-form-item>
       </div>
-		<el-form-item >
-			<el-button type="primary" @click="submit">提交</el-button>
-		</el-form-item>
+      <!--推荐标签-->
+      <div >
+        <div align="left" style="width: 560px; margin-left: 400px;margin-top: 5px;">
+          <p style="font-size: 10px;" >已为小主推荐攻略标签：</p>
+        </div>
+
+        <div class="tag-group"  style="width: 560px; margin-left: 400px;margin-top: 5px;">
+          <div style="float: left;width: 60px;">
+            <span class="tag-group__title" style="margin-left: 0px;"><i class="el-icon-user"></i>人物</span>
+          </div>
+           <div style="float: left;width: 500px;" align="left" >
+             <el-tag
+               style=" margin-top: 5px;margin-left: 0px;margin-right: 10px;cursor:pointer"
+               size="mini"
+               v-for="item in peopletagitems"
+               :key="item.label"
+               :type="item.type"
+               :color="item.color"
+               @click="peopletagclick(item)"
+               effect="plain">
+               {{ item.label }}
+             </el-tag>
+           </div>
+        </div>
+
+        <div class="tag-group" style="width: 560px; margin-left: 400px;margin-top: 5px">
+          <div style="float: left;width: 60px;">
+            <span class="tag-group__title"> <i class="el-icon-magic-stick"></i> 玩法</span>
+          </div>
+          <div style="float: left;width: 500px;" align="left" >
+            <el-tag
+              style=" margin-top: 5px;margin-left: 0px;margin-right: 10px;cursor:pointer"
+              size="mini"
+              v-for="item in playtagitems"
+              :key="item.label"
+              :type="item.type"
+              :color="item.color"
+              @click="playtagclick(item)"
+              effect="plain">
+              {{ item.label }}
+            </el-tag>
+          </div>
+        </div>
+        <div class="tag-group" style="width: 560px; margin-left: 400px;margin-top: 5px">
+          <div style="float: left;width: 60px;">
+            <span class="tag-group__title"><i class="el-icon-cloudy-and-sunny"></i>时节</span>
+          </div>
+          <div style="float: left;width: 500px;" align="left" >
+            <el-tag
+              style=" margin-top: 5px;margin-left: 0px;margin-right: 10px;cursor:pointer"
+              size="mini"
+              v-for="item in seasontagitems"
+              :key="item.label"
+              :type="item.type"
+              :color="item.color"
+
+              @click="seasontagclick(item)"
+              effect="plain">
+              {{ item.label }}
+            </el-tag>
+          </div>
+        </div>
+      </div>
 		</div>
+    <el-form-item >
+      <el-button type="primary" style="margin-top: 25px"   @click="submit">提交</el-button>
+    </el-form-item>
+
+    <!-- vueCropper 剪裁图片实现-->
+    <el-dialog title="图片剪裁" :visible.sync="dialogVisible" :close-on-press-escape="false" :close-on-click-modal="false" append-to-body>
+      <div class="cropper-content">
+        <div class="cropper" style="text-align:center">
+          <vueCropper
+            ref="cropper"
+            :img="option.img"
+            :outputSize="option.size"
+            :outputType="option.outputType"
+            :info="true"
+            :canScale="option.canScale"
+            :autoCrop="option.autoCrop"
+            :autoCropWidth="option.autoCropWidth"
+            :autoCropHeight="option.autoCropHeight"
+            :fixedBox="option.fixedBox"
+            :fixed="option.fixed"
+            :fixedNumber="option.fixedNumber"
+            :canMove="option.canMove"
+            :canMoveBox="option.canMoveBox"
+            :original="option.original"
+            :centerBox="option.centerBox"
+            :infoTrue="option.infoTrue"
+            :full="option.full"
+            :enlarge="option.enlarge"
+            :mode="option.mode"
+          >
+          </vueCropper>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="finish" :loading="loading">确认</el-button>
+      </div>
+    </el-dialog>
 
 	</el-form>
+
 </template>
 
 <script>
@@ -99,6 +197,8 @@
   import 'quill/dist/quill.core.css';
   import 'quill/dist/quill.snow.css';
   import 'quill/dist/quill.bubble.css';
+  import { VueCropper }  from 'vue-cropper'
+  import {mapGetters} from 'vuex'
   const toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
     ['blockquote', 'code-block'],
@@ -123,11 +223,49 @@
 		name:"StrategyEdit",
 
     components: {
-      quillEditor,editor
+      quillEditor,editor, VueCropper,
     },
     props:['psMsg'],
 		data(){
 			return {
+			  //tags
+        peopletagId:'',
+        playtagId:'',
+        seasontagId:'',
+        tagcolor:'',
+        peopletagitems: [],
+        playtagitems: [],
+        seasontagitems: [],
+        dialogVisible: false,
+        // 裁剪组件的基础配置option
+        option: {
+          img: '', // 裁剪图片的地址
+          outputSize: 0.8, // 裁剪生成图片的质量
+          outputType: 'jpeg', // 裁剪生成图片的格式
+          info: true, // 裁剪框的大小信息
+          canScale: false, // 图片是否允许滚轮缩放
+          autoCrop: true, // 是否默认生成截图框
+          autoCropWidth: 1000, // 默认生成截图框宽度
+          autoCropHeight: 360, // 默认生成截图框高度
+          fixedBox: true, // 固定截图框大小 不允许改变
+          fixed: true, // 是否开启截图框宽高固定比例
+          fixedNumber: [25, 9], // 截图框的宽高比例
+          canMove: true, // 上传图片是否可以移动
+          canMoveBox: false, // 截图框能否拖动
+          original: false, // 上传图片按照原始比例渲染
+          centerBox: true, // 截图框是否被限制在图片里面
+          infoTrue: true, // true 为展示真实输出图片宽高 false 展示看到的截图框宽高
+          full: false, // 是否输出原图比例的截图
+          enlarge: '1', // 图片根据截图框输出比例倍数
+          mode: 'contain' // 图片默认渲染方式
+        },
+        // 防止重复提交
+        loading: false,
+        first:'true',
+        fileName: "", //本机文件地址
+        downImg: "#",
+        imgFile: "",
+        uploadImgRelaPath: "" ,//上传后的图片的地址（不带服务器域名）
 				imageUrl:'',
 				dynamicTags: [],
 				drawer: false,
@@ -144,6 +282,7 @@
           cover:'',
           daynum:'1',
           pay:'',
+          month:'',
 				},
         quillUpdateImg: false, // 根据图片上传状态来确定是否显示loading动画，刚开始是false,不显示
         serverUrl: 'http://localhost:8888/manage/pic/upload.do',  // 这里写你要上传的图片服务器地址
@@ -174,6 +313,97 @@
 			}
 		},
 		methods:{
+		  getrecommtags(){
+		    //获取富文本框中文本
+        var text= this.$refs.myQuillEditor.quill.getText();
+        var content =this.form.title+text;
+		    //这个触发在点击添加日期的时候
+        var _vm=this
+        this.service.post("/manage/strategy/recommTags.do",{
+          "content":content,
+        }).then(function (response) {
+          console.log("playresponse==="+response);
+          if(response.data.status==0&&response.data.wrongMsg==null){
+            //返回数据，season,play,people
+            _vm.seasontagId=response.data.data[0].id;
+            _vm.playtagId=response.data.data[1].id;
+            _vm.peopletagId=response.data.data[2].id;
+            _vm.seasontagitems[response.data.data[0].id-1].color="#efd576"
+            _vm.playtagitems[response.data.data[1].id-1].color="#efd576"
+            _vm.peopletagitems[response.data.data[2].id-1].color="#efd576"
+            // _vm.seasontagclick(response.data.data[0])
+            // _vm.playtagclick(response.data.data[1])
+            // _vm.peopletagclick(response.data.data[2])
+          }else{
+
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+
+
+      },
+		  getplay(){
+		    var _vm=this
+        this.service.post("/manage/strategy/play/getallplay.do",{
+        }).then(function (response) {
+          console.log("playresponse==="+response);
+          if(response.data.status==0&&response.data.wrongMsg==null){
+            _vm.playtagitems=response.data.data
+          }else{
+
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+      },
+		  getpeople(){
+        var _vm=this
+        this.service.post("/manage/strategy/people/getallpeople.do",{
+        }).then(function (response) {
+          if(response.data.status==0&&response.data.wrongMsg==null){
+            _vm.peopletagitems=response.data.data
+          }else{
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+      },
+		  getseason(){
+        var _vm=this
+        this.service.post("/manage/strategy/season/getallseason.do",{
+        }).then(function (response) {
+          if(response.data.status==0&&response.data.wrongMsg==null){
+            _vm.seasontagitems=response.data.data
+          }else{
+
+          }
+        }).catch(function (error) {
+          console.log(error);
+        });
+      },
+		  peopletagclick(item){
+        for( var i=0;i< this.peopletagitems.length;i++){
+          this.peopletagitems[i].color=''
+        }
+        item.color="#efd576"
+        this.peopletagId=item.id
+      },
+      playtagclick(item){
+        for( var i=0;i< this.playtagitems.length;i++){
+          this.playtagitems[i].color=''
+        }
+        item.color="#efd576"
+        this.playtagId=item.id
+      },
+      seasontagclick(item){
+        for( var i=0;i< this.seasontagitems.length;i++){
+          this.seasontagitems[i].color=''
+        }
+        item.color="#efd576"
+        this.seasontagId=item.id
+      },
       // 上传图片前
       beforeUpload(res, file) {
         this.quillUpdateImg = true
@@ -189,7 +419,6 @@
           // 获取光标所在位置
           let length = quill.getSelection().index;
           // 插入图片  res.info为服务器返回的图片地址,res.data.url
-          console.log("=====uploadSueccess======="+res.data.url)
           quill.insertEmbed(length, 'image', 'http://127.0.0.1/'+res.data.filename)
           // 调整光标到最后
           quill.setSelection(length + 1)
@@ -213,17 +442,12 @@
 			this.form.keyword=this.dynamicTags;
 			let myDate = new Date();
 			let time = myDate.toLocaleDateString().split('/').join('-');
+			this.form.month=this.form.time.split('-')[1]
 			//this.form.addTime=time;
       let hour=myDate.getHours();
       let min = myDate.getMinutes();
       let sec = myDate.getSeconds();
       this.form.addTime=time+" "+hour+":"+min+":"+sec;
-      console.log(this.form.content+"===content==")
-      console.log(this.form.time+"===time==")
-      console.log(this.form.addTime+"===addtime==")
-      console.log(this.form.title+"===title==")
-			// this.post("event/save",(result)=>{
-			// },this.form,'form');
       this.service.post("/manage/strategy/strategyinsert.do",{
         //  params:
         "sName":this.form.title,
@@ -233,6 +457,15 @@
         "sPay":this.form.pay,
         "sDay":this.form.daynum,
         "sCover":this.form.cover,
+        "sStatus":1,
+        "sComNum":0,
+        "sCliNum":0,
+        "sLookNum":0,
+        "sPeopleId":this.peopletagId,
+        "sPlayId":this.playtagId,
+        "sSeasonId":this.peopletagId,
+        "sMasterId":this.getUser.uId, //这里有从vuex中取
+        "sPicId":this.form.month,
         //  }
       }).then(function (response) {
         console.log(response);
@@ -249,8 +482,47 @@
 		},
 
 		changeImg(file,fileList){
-			this.imageUrl=URL.createObjectURL(file.raw);
+		//	this.imageUrl=URL.createObjectURL(file.raw);
+      const isLt5M = file.size / 1024 / 1024 < 5
+      if (!isLt5M) {
+        this.$message.error('上传文件大小不能超过 5MB!')
+        return false
+      }
+      // 上传成功后将图片地址赋值给裁剪框显示图片
+      this.$nextTick(() => {
+        this.option.img = URL.createObjectURL(file.raw)
+        console.log("===this,option.img=="+this.option.img)
+        this.dialogVisible = true
+      })
 		},
+      finish () {
+        var _vm=this;
+        // 获取截图的base64 数据
+        var formdata = new FormData();
+        this.$refs .cropper.getCropBlob(data => {
+          formdata.append("uploadCover",data);
+          this.axios.put("http://localhost:8888/manage/pic/uploadCover.do",formdata
+          ).then(function (response) {
+            console.log(response);
+            if(response.data.status==0&&response.data.wrongMsg==null){
+              _vm.loading = true
+              // 把图片上传到服务器
+              setTimeout(() => {
+                _vm.loading = false
+                _vm.dialogVisible = false
+                _vm.imageUrl = "http://127.0.0.1/"+response.data.data.filename
+                _vm.form.cover="http://127.0.0.1/"+response.data.data.filename;
+                document.querySelector('.file-image div').attribute(style)
+              }, 1000)
+            }else{
+              alert("添加失败")
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+
+        });
+      },
 		handleAvatarSuccess(res, file) {
 			this.form.image="http://127.0.0.1/"+res.data.filename;
 			console.log("====handleAvatarSuccess====="+res.data.filename);
@@ -258,16 +530,25 @@
 		},
 	},
 		created() {
-			this.form.id=this.psMsg;
-			console.log(this.form.id);
+
 		},
 		computed:{
+      ...mapGetters(['getUser']),
 			uploadurl(){return "http://localhost:8888/manage/pic/uploadCover.do";}
 		},
+    mounted(){
+		    this.getplay(),
+        this.getpeople(),
+        this.getseason()
+    },
 	}
 </script>
 
 <style>
+  .cropper {
+    width: auto;
+    height: 320px;
+  }
   *{margin:0; padding:0;}
 	.el-tag + .el-tag {
     margin-left: 10px;
