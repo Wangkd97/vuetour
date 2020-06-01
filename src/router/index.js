@@ -10,6 +10,18 @@ import quillPic from '@/pages/test/quillPic'
 import testPicCut from'@/pages/test/testPicCut'
 import StrategyMain from "../pages/strategy/StrategyMain"
 import StrategyStore from '@/pages/strategy/StrategyStore'
+import MyZone from '@/pages/my/MyZone'
+import TestMain from '@/pages/strategy/TestMain'
+import TestStore from '@/pages/strategy/TestStore'
+import StrategyUpdate from '@/pages/strategy/StrategyUpdate'
+import SysMain from '@/components/Main'
+import StrategyShowAdmin from '@/pages/admin/StrategyShowAdmin'
+import TestComment from '@/pages/test/TestComment'
+import CommentAdmin from '@/pages/admin/CommentAdmin'
+import RecommendAdmin from '@/pages/admin/RecommendAdmin'
+import AdminLogin from '@/pages/admin/AdminLogin'
+import UserSign from '@/pages/center/UserSign'
+
 Vue.use(Router)
 
 export default new Router({
@@ -64,6 +76,66 @@ export default new Router({
       name:'StrategyStore',
       component:StrategyStore
     },
+    {
+      path:'/MyZone',
+      name:'MyZone',
+      component:MyZone
+    },
+    {
+      path:'/TestMain',
+      name:'TestMain',
+      component:TestMain
+    },
+    {
+      path:'/TestStore',
+      name:'TestStore',
+      component:TestStore
+    },
+    {
+      path:'/StrategyUpdate',
+      name:'StrategyUpdate',
+      component:StrategyUpdate
+    },
+    {
+      path:'/StrategyUpdate/:sId',
+      name:'StrategyUpdate',
+      component:StrategyUpdate
+    },
+    {
+      path:'/SysMain',
+      name:'SysMain',
+      component:SysMain
+    },
 
+    {
+      path:'/SysStrategyShow/:sId',
+      name:'StrategyShowAdmin',
+      component:StrategyShowAdmin
+    },
+    {
+      path:'/testcom',
+      name:'TestComment',
+      component:TestComment
+    },
+    {
+      path:'/SysComment',
+      name:'CommentAdmin',
+      component:CommentAdmin
+    },
+    {
+      path:'/SysRecommend',
+      name:'RecommendAdmin',
+      component:RecommendAdmin
+    },
+    {
+      path:'/Syslogin',
+      name:'AdminLogin',
+      component:AdminLogin
+    },
+    {
+      path:'/SysSign',
+      name:'UserSign',
+      component:UserSign
+    },
   ]
 })

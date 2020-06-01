@@ -1,5 +1,4 @@
 <template>
-
   <div name="main">
     <div style="width: 100%;height:8%;text-align: end;background-color: #00C5CD;">
       <strong><el-link id="denglu" :underline="false" style="font-size: 15px" :href=dengluurl></el-link>{{denglu}}</strong>
@@ -7,19 +6,39 @@
       <span> | 退出</span>
     </div>
     <!--菜单栏-->
-    <div style="width: 100%;height: 60px;background-color: dodgerblue">
-      <el-input v-model="inputvalue"
-                prefix-icon="el-icon-search"
-                placeholder="请输入内容"
-                @change="fuzzyselect"
-                style="position: absolute;top: 21px; left: 550px;width: 250px"
-      >
-      </el-input>
-      <el-radio-group v-model="tabPosition" style="position:absolute;left: 100px;top: 21px;">
-        <el-radio-button label="首页"><p id="shouye" @click="toshouye">攻略首页</p></el-radio-button>
-        <el-radio-button label="攻略库">攻略库</el-radio-button>
-        <el-radio-button label="发布攻略" ><p id="fabu" @click="toLogin">发布攻略</p></el-radio-button>
-      </el-radio-group>
+    <div style="width: 100%;height: 60px;background-color: #F5F5F5">
+      <!--<el-input v-model="inputvalue"-->
+      <!--prefix-icon="el-icon-search"-->
+      <!--placeholder="请输入内容"-->
+      <!--@change="fuzzyselect(this.currentpage)"-->
+      <!--style="position: absolute;top: 21px; left: 550px;width: 250px"-->
+      <!--&gt;-->
+      <!--</el-input>-->
+      <br>
+      <div name="left" style="width: 380px;" >
+        <el-tabs v-model="activeName" @tab-click="handleClick"  style="margin-left: 100px;" >
+          <el-tab-pane label="首页" name="first" style="margin-left: 20px">
+          </el-tab-pane>
+          <el-tab-pane label="攻略库" name="second">
+          </el-tab-pane>
+          <el-tab-pane label="发布攻略" name="third">
+          </el-tab-pane>
+        </el-tabs >
+      </div>
+      <div name="right" >
+        <el-input v-model="inputvalue"
+                  prefix-icon="el-icon-search"
+                  placeholder="请输入内容"
+                  @change="fuzzyselect(currentpage)"
+                  style="position: absolute;top: 21px; left: 550px;width: 250px;margin-top: 10px;margin-left: 300px"
+        >
+        </el-input>
+      </div>
+      <!--<el-radio-group v-model="tabPosition" style="position:absolute;left: 100px;top: 21px;">-->
+      <!--<el-radio-button label="首页">攻略首页</el-radio-button>-->
+      <!--<el-radio-button label="攻略库"><p id="gonglueku" @click="togonglue">攻略库</p></el-radio-button>-->
+      <!--<el-radio-button label="发布攻略" ><p id="fabu" @click="toLogin">发布攻略</p></el-radio-button>-->
+      <!--</el-radio-group>-->
     </div>
 
 
@@ -194,62 +213,69 @@
       </div>
     </div>
   </div>
-
-
-
 </template>
-
 
 <script>
   import {mapGetters} from 'vuex'
     export default {
-        name: "StrategyStore",
-        data(){
-          return {
-            inputvalue:'',
-            dengluurl:'',
-            denglu:'',
-            tabPosition: 'left',
-            monthtagId:'0',
-            daytagId:'0',
-            paytagId:'0',
-            peopletagId:'-1',
-            playtagId:'-1',
-            tagcolor:'',
-            monthitems:[],
-            daysitems:[],
-            payitems:[],
-            peopletagitems: [],
-            playtagitems: [],
+        name: "TestStore",
+      data(){
+        return {
+          activeName:'second',
+          inputvalue:'',
+          dengluurl:'',
+          denglu:'',
+          tabPosition: 'left',
+          monthtagId:'0',
+          daytagId:'0',
+          paytagId:'0',
+          peopletagId:'-1',
+          playtagId:'-1',
+          tagcolor:'',
+          monthitems:[],
+          daysitems:[],
+          payitems:[],
+          peopletagitems: [],
+          playtagitems: [],
 
-            titlefontcolor:'color:black',
-            strategylist:[],
-            pagetotal:0,
-            currentpage:1,
-            start:1,
+          titlefontcolor:'color:black',
+          strategylist:[],
+          pagetotal:0,
+          currentpage:1,
+          start:1,
 
+        }
+
+      },
+      methods:{
+        handleClick(tab, event) {
+          if(tab.label=="首页"){
+            this.$router.push("/TestMain");
+          }else if (tab.label=="攻略库"){
+            this.$router.push("/TestStore");
+          }else if(tab.label=="发布攻略"){
+            this.$router.push("/edit");
           }
 
         },
-      methods:{
         geifenleinum(){
-           var _vm=this;
-           this.service.post("/manage/strategy/countfenleiall.do",{
-             "month":this.monthtagId,
-             "day":this.daytagId,
-             "pay":this.paytagId,
-             "people":this.peopletagId,
-             "play":this.playtagId,
-           }).then(function (response) {
-             if(response.status==200){
-               _vm.pagetotal=response.data.data;
-             }else{
-               console.log("=======aaaaaa=======")
-             }
-           }).catch(function (error) {
-             console.log(error);
-           });
-         },
+          var _vm=this;
+          this.service.post("/manage/strategy/countfenleiall.do",{
+            "month":this.monthtagId,
+            "day":this.daytagId,
+            "pay":this.paytagId,
+            "people":this.peopletagId,
+            "play":this.playtagId,
+          }).then(function (response) {
+            if(response.status==200){
+              _vm.pagetotal=response.data.data;
+            }else{
+              console.log("=======aaaaaa=======")
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+        },
         fenleiselect(currentPage){
           this.geifenleinum();
           var start = (currentPage-1)*10;
@@ -262,16 +288,16 @@
             "play":this.playtagId,
             "start":start
           }).then(function (response) {
-              console.log(response)
+            console.log(response)
             if(response.status==200){
-                console.log("分类===="+response.data.data)
+              console.log("分类===="+response.data.data)
               _vm.strategylist=response.data.data;
             }else{
             }
           }).catch(function (error) {
             console.log(error);
           });
-          },
+        },
         fuzzyselect(){
           this.chongzhitag();
           this.getfuzzynum();
@@ -311,22 +337,22 @@
           });
         },
         iflogin(){
-            if(JSON.stringify( this.getUser)=='{}'){
-              //未登录
-              // this.$message("weidenglu")
+          if(JSON.stringify( this.getUser)=='{}'){
+            //未登录
+            // this.$message("weidenglu")
 
-              this.denglu="登录"
-              this.dengluurl="http://127.0.0.1:8080/#/login"
-            }else{
-              //已登录
-              //  this.$message("user=="+this.getUser)
-              this.denglu=this.getUser.uName
-              this.dengluurl="http://127.0.0.1:8080/#/main"
-            }
-          },
+            this.denglu="登录"
+            this.dengluurl="http://127.0.0.1:8080/#/login"
+          }else{
+            //已登录
+            //  this.$message("user=="+this.getUser)
+            this.denglu=this.getUser.uName
+            this.dengluurl="http://127.0.0.1:8080/#/main"
+          }
+        },
         toshouye(){
-            this.$router.push("/StrategyMain")
-          },
+          this.$router.push("/StrategyMain")
+        },
         test(){
           this.$message("11");
         },
@@ -422,6 +448,8 @@
           this.service.post("/manage/strategy/play/getmodifyplay.do",{
           }).then(function (response) {
             console.log("playresponse==="+response);
+            console.log("playresponse.data==="+response.data);
+            console.log("playresponse.data.data==="+response.data.data);
             if(response.data.status==0&&response.data.wrongMsg==null){
 
               _vm.playtagitems=response.data.data
@@ -509,15 +537,16 @@
 
       },
       mounted(){
-          this.getday(),
+        this.getday(),
           this.getpay(),
           this.getmonth(),
-        this.iflogin()
+          this.iflogin()
+        this.getData(this.currentpage);
       },
       created(){
         this.getplay(),
           this.getpeople(),
-        this.getData(this.currentpage);
+
         this.getstragetynum();
 
       },
@@ -539,4 +568,7 @@
 
   }
   *{margin:0; padding:0;}
+  .el-tabs__item {
+    font-size: 18px !important;
+  }
 </style>

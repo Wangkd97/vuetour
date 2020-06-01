@@ -12,6 +12,8 @@ const state={
   userInfo:{},
   username:'',
   fuzzyname:'',
+  sysOption:'1-1',
+  sysUserInfo:{},
 
 }
 

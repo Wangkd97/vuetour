@@ -1,19 +1,18 @@
 <template>
   <el-form >
     <div >
-
       <!--头部-->
       <div style="width: 100%;height:8%;text-align: end;background-color: #00C5CD;">
-        <strong><el-link id="denglu" :underline="false" style="font-size: 15px" :href=dengluurl></el-link>{{denglu}}</strong>
-        <span> | 我的空间</span>
-        <span> | 退出</span>
+        <strong style="cursor: pointer" @click="denglutologin"><el-link id="denglu" :underline="false" style="font-size: 15px;cursor: pointer" :href=dengluurl></el-link>{{denglu}}</strong>
+        <span style="cursor: pointer" @click="toMyZone"> | 我的空间</span>
+        <span @click="usertoexit" style="cursor: pointer"> | 退出</span>
       </div>
       <!--菜单栏-->
       <div style="width: 100%;height: 60px;background-color: dodgerblue">
         <el-input v-model="inputvalue"
                   prefix-icon="el-icon-search"
                   placeholder="请输入内容"
-                  @change="fuzzyselect"
+                  @change="fuzzyselect(this.currentpage)"
                   style="position: absolute;top: 21px; left: 550px;width: 250px"
                 >
         </el-input>
@@ -121,7 +120,7 @@
         data(){
           return{
             inputvalue:'',
-            dengluurl:'',
+            dengluurl:'/login',
             denglu:'',
             titlefontcolor:'color:black',
             strategylist:[],
@@ -143,9 +142,40 @@
 
       methods:{
         ...mapActions(['setFuzzyName']),
+       usertoexit(){
+          let _vm=this
+         this.service.post("/manage/user/exit.do",{
 
-          fuzzyselect(currentpage){
+         }).then(function (response) {
+           if(response.data.status==0){
+            _vm.$message({
+              type:"success",
+              message:"推出成功"
+            })
+           }else{
+             console.log("=======aaaaaa=======")
+           }
+         }).catch(function (error) {
+           console.log(error);
+         });
+       },
+        AddLookNum(sId){
+          console.log("nimabide")
+          this.service.post("/manage/strategy/updateLookNum.do",{
+            //  params:
+            "sId":sId
+            //  }
+          }).then(function (response) {
+            if(response.status==200){
 
+            }else{
+              console.log("=======aaaaaa=======")
+            }
+          }).catch(function (error) {
+            console.log(error);
+          });
+        },
+        fuzzyselect(currentpage){
           this.getfuzzynum();
             var start = (currentpage-1)*10;
             var _vm=this;
@@ -166,11 +196,10 @@
               console.log(error);
             });
           },
-
-          togonglue(){
+        togonglue(){
             this.$router.push("/StrategyStore")
           },
-          toLogin(){
+        toLogin(){
             if(JSON.stringify( this.getUser)=='{}'){
               //未登录
               this.$router.push("/login");
@@ -180,11 +209,12 @@
             }
 
           },
-          toMain(strategyId){
+        toMain(strategyId){
+            this.AddLookNum(strategyId);
             let routeData = this.$router.resolve({
-              path:'/show/'+strategyId,
-            });
-            window.open(routeData.href, '_blank');
+            path:'/show/'+strategyId,
+          });
+          window.open(routeData.href, '_blank');
               },
         handleCurrentChange: function(currentPage) {
           this.currentPage = currentPage;
@@ -202,10 +232,10 @@
         mouseOver(index){
           document.getElementById(index).style.color="#409EFF";
         },
-          test(){
+        test(){
             this.$message("11");
           },
-          getData( currentpage){
+        getData( currentpage){
             var _vm=this;
             var start = (currentpage-1)*10;
             this.service.post("/manage/strategy/fenyeselect.do",{
@@ -224,7 +254,7 @@
               console.log(error);
             });
           },
-          getstragetynum(){
+        getstragetynum(){
             var _vm=this;
             this.service.post("/manage/strategy/selectcountall.do",{
             }).then(function (response) {
@@ -255,6 +285,21 @@
             console.log(error);
           });
         },
+        toMyZone(){
+          if(JSON.stringify( this.getUser)=='{}'){
+            //未登录
+            this.$router.push("/login");
+          }else{
+            //已登录
+            this.$router.push("/MyZone");
+          }
+        },
+        denglutologin(){
+          if(JSON.stringify( this.getUser)=='{}' &&this.denglu=="登录"){
+            //未登录
+            this.$router.push("/login");
+          }
+        }
       },
       created(){
         this.getData(this.currentpage);

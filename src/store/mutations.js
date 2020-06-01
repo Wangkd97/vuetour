@@ -8,3 +8,9 @@ export  function setUserName(state,username){
 export  function setFuzzyName(state,fuzzyname){
   state.fuzzyname=fuzzyname
 }
+export  function setsysOption(state,sysOption){
+  state.sysOption=sysOption
+}
+export  function setsysUserInfo(state,sysUserInfo){
+  state.sysUserInfo=sysUserInfo
+}

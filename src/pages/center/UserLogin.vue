@@ -1,9 +1,7 @@
 <template>
-
-
   <div>
     <div class="top" style="width: 100%;height: 50px">
-      头部
+
     </div>
     <div class=tole>
 
@@ -33,7 +31,11 @@
       </div>
     </div>
     <div class="footer" >
-      尾部
+
+      <span>Copyright ©2019 Mr.Wang  &nbsp;&nbsp; 地址：河北省秦皇岛市河北大街西段438号 </span> <br>
+      <span>Be Gradeful for Mr.Wang </span>
+
+
 
     </div>
 
@@ -71,8 +73,6 @@
       submitForm(formName) {
         this.$refs[formName].validate(valid => {
           if (valid) {
-            console.log(this.ruleForm.username+"=======loginname=====")
-            console.log(this.ruleForm.password+"====loginpwd========")
             var _vm=this;
             //通过axios
             this.service.post("/manage/user/login.do",{
@@ -82,13 +82,19 @@
               //  }
             },this.ruleForm,formName).then(function (response) {
               console.log(response);
-              if(response.data.status==0&&response.data.wrongMsg==null){
+              if(response.data.status==0&&response.data.msg==null){
                 //当用户登录成功后，将用户信息保存到vuex中
                  _vm.setUserInfo(response.data.data)
                 _vm.setUserName(response.data.data.uName)
-                _vm.$router.push("/StrategyMain")
+                _vm.$router.push("/TestMain")
 
               }else{
+
+                _vm.$message({
+                  showClose: true,
+                  message: response.data.msg,
+                  type: 'error'
+                })
               }
             }).catch(function (error) {
               console.log(error);
@@ -101,7 +107,6 @@
         })
       }
       },
-
       userLogin:function () {
 
         if(this.ruleForm.username==''||this.ruleForm.password==''){
@@ -148,7 +153,7 @@
     //this.$router.push("/login");
   }else{
     //已登录
-    this.$router.push("/StrategyMain");
+    this.$router.push("/TestMain");
   }
 
   }

@@ -64,7 +64,7 @@
               align="right"
               type="date"
               placeholder="选择出发日期"
-              value-format="yyyy-M-d">
+              value-format="yyyy-MM-dd">
             </el-date-picker>
 
             &nbsp;&nbsp;
@@ -389,6 +389,7 @@
         }
         item.color="#efd576"
         this.peopletagId=item.id
+
       },
       playtagclick(item){
         for( var i=0;i< this.playtagitems.length;i++){
@@ -396,6 +397,7 @@
         }
         item.color="#efd576"
         this.playtagId=item.id
+
       },
       seasontagclick(item){
         for( var i=0;i< this.seasontagitems.length;i++){
@@ -434,11 +436,11 @@
         this.quillUpdateImg = false
         this.$message.error('图片插入失败')
       },
-		getData(){
+		  getData(){
 
 		},
-		submit(){
-
+		  submit(){
+      var _vm=this
 			this.form.keyword=this.dynamicTags;
 			let myDate = new Date();
 			let time = myDate.toLocaleDateString().split('/').join('-');
@@ -447,6 +449,42 @@
       let hour=myDate.getHours();
       let min = myDate.getMinutes();
       let sec = myDate.getSeconds();
+
+        var day = new Date();
+        var Year = 0;
+        var Month = 0;
+        var Day = 0;
+        var CurrentDate = "";
+        //初始化时间
+        //Year       = day.getYear();//有火狐下2008年显示108的bug
+        Year       = day.getFullYear();//ie火狐下都可以
+        Month      = day.getMonth()+1;
+        Day        = day.getDate();
+        CurrentDate += Year + "-";
+        if (Month >= 10 )
+        {
+          CurrentDate += Month + "-";
+        }
+        else
+        {
+          CurrentDate += "0" + Month + "-";
+        }
+        if (Day >= 10 )
+        {
+          CurrentDate += Day ;
+        }
+        else
+        {
+          CurrentDate += "0" + Day ;
+        }
+        if(hour<=9){
+          hour='0'+hour;
+        }if(min<10){
+          min='0'+min;
+        }if(sec<=9){
+          sec='0'+sec;
+        }
+
       this.form.addTime=time+" "+hour+":"+min+":"+sec;
       this.service.post("/manage/strategy/strategyinsert.do",{
         //  params:
@@ -470,9 +508,9 @@
       }).then(function (response) {
         console.log(response);
         if(response.data.status==0&&response.data.wrongMsg==null){
-          alert("添加成功")
+          _vm.$router.push("/MyZone");
         }else{
-          alert("添加失败")
+          _vm.$message("失败");
         }
       }).catch(function (error) {
         console.log(error);
@@ -480,8 +518,7 @@
 			this.$emit('transfer');
 			
 		},
-
-		changeImg(file,fileList){
+		  changeImg(file,fileList){
 		//	this.imageUrl=URL.createObjectURL(file.raw);
       const isLt5M = file.size / 1024 / 1024 < 5
       if (!isLt5M) {
@@ -523,14 +560,20 @@
 
         });
       },
-		handleAvatarSuccess(res, file) {
+		  handleAvatarSuccess(res, file) {
 			this.form.image="http://127.0.0.1/"+res.data.filename;
 			console.log("====handleAvatarSuccess====="+res.data.filename);
       this.form.cover="http://127.0.0.1/"+res.data.filename;
 		},
+      iflogin(){
+        if(JSON.stringify( this.getUser)=='{}'){
+          //未登录
+          this.$router.push("/login");
+        }
+      },
 	},
 		created() {
-
+      this.iflogin();
 		},
 		computed:{
       ...mapGetters(['getUser']),

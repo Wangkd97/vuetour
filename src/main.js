@@ -47,6 +47,6 @@ new Vue({
   el: '#app',
   router,
   store,
-  components: { App,mainpage },
+  components: { App,mainpage},
   template: '<App/>'
 })

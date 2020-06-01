@@ -9,4 +9,10 @@ export function  setUserName({commit},user) {
 export function  setFuzzyName({commit},fuzzyname) {
   return commit('setFuzzyName',fuzzyname)
 }
+export function  setsysOption({commit},sysOption) {
+  return commit('setsysOption',sysOption)
+}
+export function  setsysUserInfo({commit},sysUserInfo) {
+  return commit('setsysUserInfo',sysUserInfo)
+}
 
